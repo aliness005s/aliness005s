@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFCF8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AdoceUp">
+  <title>AdoceUp — Precificação e Orçamentos para Confeitaria</title>
+  <link rel="manifest" href="manifest.json?v=2">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="vendor/html2canvas.min.js"></script>
+  <script src="js/wordmark-data.js"></script>
+  <link rel="stylesheet" href="css/styles.css?v=6">
+</head>
+
+<body>
+
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <div class="app">
+
+    <!-- ══════ APP HEADER FIXO — todas as telas ══════ -->
+    <header class="app-header" id="appHeader" onclick="showScreen('s-home')"
+      onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); showScreen('s-home'); }"
+      role="link" tabindex="0" aria-label="Ir para a página inicial">
+      <div class="ah-inner">
+        <div class="ah-brand">
+          <img class="ah-wordmark" src="icons/adoceup-wordmark.png" alt="AdoceUp">
+        </div>
+        <div class="ah-maker" aria-label="Marca">
+          <span class="ah-maker-label">by </span>
+          <a class="ah-maker-name" href="https://www.google.com" target="_blank" rel="noopener noreferrer"
+            onclick="event.stopPropagation()"> Alyntics</a>
+        </div>
+      </div>
+
+      <!-- Faixa listrada decorativa (fixa, embaixo do cabeçalho) -->
+      <section class="home-hero" aria-label="Faixa decorativa">
+        <div class="confeit-ticker" id="confeitTicker" aria-hidden="true"></div>
+      </section>
+    </header>
+
+    <div class="scroll" id="scroll">
+
+      <!-- ══════ SCREEN 1: HOME ══════ -->
+      <section class="screen active" id="s-home">
+
+        <!-- CARD DO PERFIL — frases giram abaixo do nome ↔ dados ao expandir -->
+        <div class="hh-user" id="hhUser">
+
+          <div class="hh-user-row">
+            <div class="hello">
+              <div class="hh-kicker">Sua confeitaria, em destaque</div>
+              <div class="name" id="homeName">Minha Confeitaria</div>
+            </div>
+            <button class="hh-toggle" id="hhToggle" onclick="toggleProfilePanel(event)"
+              aria-label="Ver dados da confeitaria" aria-expanded="false">
+              <span class="avatar" id="homeAvatar">B</span>
+              <span class="hh-plus" aria-hidden="true">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"
+                  stroke-linecap="round">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <!-- Área de swap: frases ↔ dados ocultos -->
+          <div class="hh-swap">
+            <div class="hh-swap-phrase" id="hhSwapPhrase">
+              <span class="hh-phrase active">✨ Cada brigadeiro é uma pequena obra-prima</span>
+              <span class="hh-phrase">🍬 Tempo + ingredientes + talento = preço justo</span>
+              <span class="hh-phrase">💕 Confeiteira que se valoriza conquista mais clientes</span>
+              <span class="hh-phrase">🌸 Doces feitos com amor merecem preço com razão</span>
+              <span class="hh-phrase">🎂 Sua arte tem valor — precifique com confiança</span>
+            </div>
+            <div class="hh-swap-data">
+              <div class="hh-rate-block">
+                <span class="hh-data-label">Sua hora vale</span>
+                <span class="hh-rate-val" id="heroMoney">R$ 0<small>,00</small></span>
+              </div>
+              <span class="hh-rate-meta">
+                <span><b id="heroMeta">R$ 0/mês</b><small>meta mensal</small></span>
+                <span><b id="heroHoras">0h</b><small>disponibilidade</small></span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Painel expansível: botão editar -->
+          <div class="hh-panel" id="hhPanel">
+            <div class="hh-panel-note" id="heroInsight">Esse valor entra no custo de cada receita.</div>
+            <button class="hh-edit" onclick="openProfileEdit()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+              Editar dados
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ══════ AÇÕES — BENTO GRID ══════ -->
+        <section class="home-zone home-actions-zone" aria-labelledby="homeActionsTitle">
+          <div class="home-zone-kicker">Painel de hoje</div>
+          <div class="sec-title home-actions-title" id="homeActionsTitle">O que vamos fazer hoje?</div>
+
+          <div class="bento">
+            <button class="bento-hero" onclick="startPrecificar()" aria-label="Precificar produto">
+              <span class="bh-deco" aria-hidden="true">🧁</span>
+              <div class="bh-content">
+                <span class="bh-eyebrow">Passo a passo</span>
+                <h3 class="bh-title">Precificar<br>produto</h3>
+                <p class="bh-desc">Calcule um preço justo considerando seus custos.</p>
+              </div>
+              <span class="bh-arrow" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </span>
+            </button>
+
+            <button class="bento-mini bm-pink" onclick="startOrcamento()" aria-label="Gerar orçamento">
+              <span class="bm-ic" aria-hidden="true">🎂</span>
+              <div class="bm-body">
+                <span class="bm-title">Gerar orçamento</span>
+                <span class="bm-desc">Para clientes</span>
+              </div>
+            </button>
+
+            <button class="bento-mini bm-caramel" onclick="showScreen('s-fechamento')" aria-label="Calcular vendas">
+              <span class="bm-ic" aria-hidden="true">🍰</span>
+              <div class="bm-body">
+                <span class="bm-title">Calculadora de vendas</span>
+                <span class="bm-desc">Somar vendas e ver lucro</span>
+              </div>
+            </button>
+          </div>
+
+          <section class="backup-box" aria-labelledby="backupTitle">
+            <div class="backup-copy">
+              <div class="home-zone-kicker">Segurança</div>
+              <div class="backup-title" id="backupTitle">Guardar meu trabalho</div>
+              <p>Salve tudo com tranquilidade e recupere quando precisar.</p>
+            </div>
+            <div class="backup-actions">
+              <button class="backup-btn backup-btn-save" type="button" onclick="baixarBackup()">
+                <span aria-hidden="true">↓</span>
+                Salvar
+              </button>
+              <button class="backup-btn backup-btn-load" type="button" onclick="abrirCarregarBackup()">
+                <span aria-hidden="true">↑</span>
+                Recuperar
+              </button>
+            </div>
+            <input type="file" id="backupFileInput" accept="application/json,.json" hidden>
+          </section>
+        </section>
+
+        <section class="home-zone home-products-zone" id="homeProdutosWrap" aria-labelledby="homeProductsTitle">
+          <div class="home-zone-heading">
+            <div>
+              <div class="home-zone-kicker">Catálogo vivo</div>
+              <div class="sec-title" id="homeProductsTitle">Seus produtos recentes</div>
+            </div>
+            <button class="prod-next" id="prodNext" type="button" onclick="avancarProdutos()"
+              aria-label="Ver mais produtos" title="Ver mais produtos">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+          <div class="sec-sub">Toque para ver detalhes ou orçar.</div>
+          <div class="prod-scroll" id="homeProdutos"></div>
+        </section>
+
+      </section>
+
+      <!-- ══════ SCREEN 2: INGREDIENTES ══════ -->
+      <section class="screen" id="s-ingredientes">
+        <div class="flow-head">
+          <div class="flow-title-block">
+            <div class="eyebrow">Despensa Digital</div>
+            <div class="h2">Meus insumos</div>
+          </div>
+        </div>
+
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+          <input type="text" id="buscaIng" maxlength="200" placeholder="Procurar insumo...">
+        </div>
+
+        <div id="listaIngredientes"></div>
+
+        <button class="btn btn-ghost" id="novoInsumoBtn" onclick="openIngredienteForm()" style="margin-top:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Adicionar novo insumo
+        </button>
+      </section>
+
+      <!-- ══════ SCREEN 3: PRODUTOS ══════ -->
+      <section class="screen" id="s-produtos">
+        <div class="flow-head">
+          <div class="flow-title-block">
+            <div class="eyebrow">Catálogo de Doces</div>
+            <div class="h2">Produtos Precificados</div>
+          </div>
+        </div>
+
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7" />
+            <path d="M20 20l-3.5-3.5" />
+          </svg>
+          <input type="text" id="buscaProd" maxlength="200" placeholder="Procurar produto...">
+        </div>
+
+        <div id="listaProdutos"></div>
+
+        <button class="btn btn-ghost" id="novoProdutoBtn" onclick="startPrecificar()" style="margin-top:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Precificar novo produto
+        </button>
+      </section>
+
+      <!-- ══════ SCREEN 4: ORÇAMENTOS ══════ -->
+      <section class="screen" id="s-orcamentos">
+        <div class="flow-head">
+          <div class="flow-title-block">
+            <div class="eyebrow">Para Clientes</div>
+            <div class="h2">Gerar Orçamento</div>
+          </div>
+        </div>
+
+        <div id="listaOrcamentos"></div>
+      </section>
+
+      <!-- ══════ SCREEN 5: CALCULADORA DE VENDAS ══════ -->
+      <section class="screen" id="s-fechamento">
+        <div class="flow-head">
+          <div class="flow-title-block">
+            <div class="eyebrow">Calculadora de vendas</div>
+            <div class="h2">Somar vendas</div>
+          </div>
+        </div>
+
+        <div class="flow-sub">Some as vendas de um período e veja quanto entrou e quanto sobrou. Esta conta é apenas uma
+          lembrança rápida.</div>
+
+        <div class="segmented">
+          <button class="seg active" data-period="Hoje" onclick="setFechPeriodo(this)">Hoje</button>
+          <button class="seg" data-period="Esta semana" onclick="setFechPeriodo(this)">Semana</button>
+          <button class="seg" data-period="Este mês" onclick="setFechPeriodo(this)">Mês</button>
+          <button class="seg" data-period="Personalizado" onclick="setFechPeriodo(this)">Personalizado</button>
+        </div>
+
+        <div class="field fech-custom-period" id="fechCustomPeriod" style="display:none;">
+          <label for="fechPeriodoInput">Como quer identificar esse intervalo?</label>
+          <div class="input-wrap">
+            <input type="text" id="fechPeriodoInput" placeholder="Ex.: sábado à tarde, 10 a 15/09 ou esta semana"
+              maxlength="60" oninput="atualizarFechPeriodo(this.value)">
+          </div>
+        </div>
+
+        <div id="fechItens"></div>
+
+        <button class="btn btn-ghost" onclick="abrirAddFechItem()" style="margin-bottom:16px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Adicionar item vendido
+        </button>
+
+        <div class="receipt" id="fechReceipt"></div>
+
+        <button class="btn btn-soft" onclick="gerarPDFFechamento()" style="margin-top:4px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          Gerar PDF do resumo
+        </button>
+      </section>
+
+      <!-- ══════ WIZARD: PRECIFICAÇÃO ══════ -->
+      <section class="screen" id="s-precificar">
+        <div class="flow-head">
+          <button class="back-btn" onclick="precBack()" aria-label="Voltar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div class="flow-title-block">
+            <div class="flow-count" id="precCount">Passo 1 de 4</div>
+            <div class="flow-name">Precificar Produto</div>
+          </div>
+        </div>
+
+        <div class="timeline" id="precTimeline"></div>
+        <div class="flow-body" id="precBody"></div>
+      </section>
+
+      <!-- ══════ WIZARD: ORÇAMENTO ══════ -->
+      <section class="screen" id="s-orcamento">
+        <div class="flow-head">
+          <button class="back-btn" onclick="orcBack()" aria-label="Voltar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <div class="flow-title-block">
+            <div class="flow-count" id="orcCount">Passo 1 de 5</div>
+            <div class="flow-name">Gerar Orçamento</div>
+          </div>
+        </div>
+
+        <div class="timeline" id="orcTimeline"></div>
+        <div class="flow-body" id="orcBody"></div>
+      </section>
+
+    </div>
+
+    <!-- ══════ BOTTOM NAV ══════ -->
+    <nav class="nav" id="nav">
+      <div class="nav-brand" aria-label="AdoceUp">
+        <span class="nav-brand-mark">
+          <img src="icons/192.png" alt="" width="40" height="40">
+        </span>
+        <span class="nav-brand-copy">
+          <strong>AdoceUp</strong>
+          <small>Precificação para confeitaria</small>
+        </span>
+      </div>
+
+      <button class="nav-btn active" data-screen="s-home" onclick="showScreen('s-home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19v-8.5Z" />
+          <path d="M9.5 20.5v-6h5v6" />
+        </svg>
+        <span>Início</span>
+      </button>
+      <button class="nav-btn" data-screen="s-ingredientes" onclick="showScreen('s-ingredientes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 10.5h14l-1.3 8.2a2 2 0 0 1-2 1.7H8.3a2 2 0 0 1-2-1.7L5 10.5Z" />
+          <path d="M7 10.5c-.6-1.4.3-2.6 1.5-3.1C8.3 6 9.3 4.5 12 4.5s3.7 1.5 3.5 2.9c1.2.5 2.1 1.7 1.5 3.1" />
+        </svg>
+        <span>Insumos</span>
+      </button>
+      <button class="nav-btn" data-screen="s-produtos" onclick="showScreen('s-produtos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v3M8 6h8l-1 4H9L8 6Z" />
+          <path d="M6 10h12l-1.2 9.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 10Z" />
+        </svg>
+        <span>Produtos</span>
+      </button>
+      <button class="nav-btn" data-screen="s-orcamentos" onclick="showScreen('s-orcamentos')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 5h16v14H4z" />
+          <path d="M4 9h16M8 13h4" />
+        </svg>
+        <span>Orçamentos</span>
+      </button>
+      <button class="nav-btn" data-screen="s-fechamento" onclick="showScreen('s-fechamento')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5.5 20V11M12 20V4.5M18.5 20v-6.5" />
+        </svg>
+        <span>Vendas</span>
+      </button>
+
+      <a class="nav-footer" href="https://www.google.com" target="_blank" rel="noopener noreferrer"
+        aria-label="Alyntics (abre em nova aba)">
+        <span>by</span>
+        <strong>Alyntics</strong>
+      </a>
+    </nav>
+
+    <!-- ══════ FAB ══════ -->
+    <div class="fab-wrap" id="fabWrap">
+      <div class="fab-menu" id="fabMenu">
+        <button class="fab-item fab-item-settings" onclick="closeFab(); openProfileEdit()">
+          <span class="fi-ic" aria-hidden="true">👤</span>
+          Meu perfil
+        </button>
+        <button class="fab-item fab-item-backup" onclick="closeFab(); baixarBackup()">
+          <span class="fi-ic" aria-hidden="true">💾</span>
+          Salvar meu trabalho
+        </button>
+        <button class="fab-item fab-item-backup" onclick="closeFab(); abrirCarregarBackup()">
+          <span class="fi-ic" aria-hidden="true">📥</span>
+          Recuperar trabalho
+        </button>
+        <button class="fab-item" onclick="closeFab(); startPrecificar()">
+          <span class="fi-ic" aria-hidden="true">🧁</span>
+          Novo produto
+        </button>
+        <button class="fab-item" onclick="closeFab(); openIngredienteForm()">
+          <span class="fi-ic" aria-hidden="true">🍫</span>
+          Novo insumo
+        </button>
+        <button class="fab-item" onclick="closeFab(); startOrcamento()">
+          <span class="fi-ic" aria-hidden="true">🎂</span>
+          Gerar orçamento
+        </button>
+      </div>
+      <button class="fab" id="fab" onclick="toggleFab()" aria-label="Abrir centro de comando">
+        <span style="font-size:26px;line-height:1;filter:drop-shadow(0 2px 3px rgba(92,58,46,.25));">✨</span>
+      </button>
+    </div>
+
+    <!-- ══════ ONBOARDING ══════ -->
+    <div class="onboarding" id="onboarding">
+      <div class="ob-inner">
+        <div class="ob-logo">
+          <img src="icons/192.png" alt="" width="70" height="70">
+        </div>
+        <h1 class="ob-title">Bem-vinda ao<br><img class="ob-wordmark" src="icons/adoceup-wordmark.png" alt="AdoceUp">
+        </h1>
+        <p class="ob-sub">Sua assistente de precificação e orçamentos para confeitaria.</p>
+
+        <div class="field">
+          <label>Nome da confeitaria <span class="req">*</span></label>
+          <div class="input-wrap"><input type="text" id="obNome" placeholder="Ex: Bia Confeitaria" maxlength="30"
+              required></div>
+          <div class="error">Informe o nome da confeitaria</div>
+        </div>
+
+        <div class="field">
+          <label>WhatsApp (opcional)</label>
+          <div class="input-wrap"><input type="tel" id="obZap" placeholder="(00) 00000-0000" inputmode="tel"></div>
+        </div>
+
+        <div class="field">
+          <label>Chave Pix (opcional)</label>
+          <div class="input-wrap"><input type="text" id="obPix" maxlength="254" placeholder="CPF, e-mail ou telefone">
+          </div>
+        </div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>Meta mensal <span class="req">*</span></label>
+            <div class="input-wrap"><span class="pre">R$</span><input type="number" id="obMeta" min="1" max="1000000000"
+                step="50" inputmode="decimal" required></div>
+            <div class="error">Meta inválida</div>
+          </div>
+          <div class="field">
+            <label>Horas / mês <span class="req">*</span></label>
+            <div class="input-wrap"><input type="number" id="obHoras" min="1" max="10000" step="1" inputmode="numeric"
+                required></div>
+            <div class="error">Horas inválidas</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Logo da confeitaria (opcional)</label>
+          <label class="logo-upload">
+            <div class="logo-preview" id="obLogoPreview">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 16l4-4 3 3 5-5 4 4v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-1Z" />
+                <circle cx="9" cy="8" r="1.5" />
+              </svg>
+            </div>
+            <div style="flex:1;">
+              <strong style="display:block;font-family:'Outfit';font-size:13.5px;font-weight:700;">Escolher
+                logo</strong>
+              <span style="font-size:11px;font-weight:600;color:var(--ink-soft);">Aparecerá na tela e nos PDFs</span>
+            </div>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" id="obLogoInput"
+              style="display:none;">
+          </label>
+        </div>
+
+        <div
+          style="display:flex;gap:8px;padding:12px 14px;background:rgba(255,201,218,.3);border-radius:16px;border:1px solid rgba(255,255,255,.9);margin-bottom:16px;font-size:12px;font-weight:600;color:var(--ink-soft);align-items:center;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"
+            style="color:var(--rose-400);flex:0 0 auto;">
+            <path d="M12 2l1.5 6.5L20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5z" />
+          </svg>
+          <span>Sua hora vai valer <strong id="obHoraPreview" style="color:var(--ink);">R$ 25,00</strong></span>
+        </div>
+
+        <button class="btn btn-primary" onclick="finishOnboarding()">Começar a usar ✨</button>
+      </div>
+    </div>
+
+    <div class="modal-bg" id="modalBg">
+      <div class="modal" id="modalBox"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div id="pdfPrintContainer"
+      style="display:none;position:absolute;left:-9999px;top:-9999px;width:750px;background:#fff;padding:30px;font-family:'Nunito', sans-serif;color:#4A2F3A;">
+    </div>
+  </div>
+
+  <script src="js/state.js?v=3"></script>
+  <script src="js/utils.js?v=10"></script>
+  <script src="js/navigation.js?v=6"></script>
+  <script src="js/profile.js?v=2"></script>
+  <script src="js/ingredients.js?v=2"></script>
+  <script src="js/products.js?v=4"></script>
+  <script src="js/precificacao.js?v=10"></script>
+  <script src="js/orcamentos.js?v=6"></script>
+  <script src="js/fechamento.js?v=6"></script>
+  <script src="js/backup.js?v=4"></script>
+  <script src="js/app.js?v=6"></script>
+
+</body>
+
+</html>
